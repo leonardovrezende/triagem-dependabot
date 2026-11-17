@@ -1,0 +1,10 @@
+[Unit]
+Description=Triagem do Dependabot toda terça de manhã (ele abre as PRs na segunda)
+
+[Timer]
+OnCalendar=Tue 09:30
+Persistent=true
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target
