@@ -9,7 +9,7 @@
 set -uo pipefail
 
 AQUI="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
-ESTADO="${TRIAGEM_ESTADO:-$HOME/.local/state/dependencias}"
+ESTADO="$HOME/.local/state/dependencias"
 CLAUDE="${CLAUDE_BIN:-$HOME/.local/bin/claude}"
 mkdir -p "$ESTADO"
 LOG="$ESTADO/execucao-$(date +%Y%m%d-%H%M).log"
@@ -23,13 +23,23 @@ fi
 
 ferramentas=(
   "Read(~/.local/state/dependencias/**)" "Edit(~/.local/state/dependencias/**)"
+  "Write(~/.local/state/dependencias/**)"
   "Bash(gh search prs:*)" "Bash(gh pr list:*)" "Bash(gh pr view:*)" "Bash(gh pr diff:*)"
   "Bash(gh pr checks:*)" "Bash(gh pr merge:*)" "Bash(gh pr comment:*)"
   "Bash(gh run list:*)" "Bash(gh run view:*)" "Bash(gh run watch:*)" "Bash(gh repo view:*)"
   "Bash(npm view:*)" "Bash(docker buildx imagetools inspect:*)"
 )
 
+# A lista só restringe de verdade com as quatro opções abaixo. Sem elas, o
+# --allowedTools apenas aprova de antemão, e o resto segue o modo de permissão
+# e as regras do settings.json do usuário (onde pode haver curl liberado):
+#   --permission-mode dontAsk  nega o que não está na lista, em vez de perguntar;
+#   --setting-sources project  ignora o settings.json do usuário (regras e hooks);
+#   --tools                    só estas ferramentas existem para o agente;
+#   --strict-mcp-config        nenhum servidor MCP do usuário.
 timeout 90m "$CLAUDE" -p "$(cat "$AQUI/prompt.md")" \
+  --permission-mode dontAsk --setting-sources project \
+  --tools Bash,Read,Edit,Write --strict-mcp-config \
   --allowedTools "${ferramentas[@]}" --max-turns 300 >"$LOG" 2>&1
 rc=$?
 if [ $rc -ne 0 ]; then

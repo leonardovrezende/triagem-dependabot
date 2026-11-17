@@ -2,7 +2,7 @@
 
 Um agente que faz sozinho, toda semana, a triagem das PRs do Dependabot nos repositórios do PET Engenharia de Computação e do IntroComp (Ufes). Ele mescla as atualizações seguras e deixa numa fila só o que precisa de alguém decidir.
 
-Da primeira rodada, em 28/10/2026, até 17/11/2026 foram 4 execuções e 34 PRs mescladas em 6 repositórios.
+Nas quatro semanas de 28/10/2026 a 17/11/2026, ele mesclou 34 PRs em 6 repositórios.
 
 ## Como decide
 
@@ -17,7 +17,9 @@ Depois do merge, quando o repositório implanta sozinho, o agente acompanha o de
 
 ## Por que uma lista fechada de ferramentas
 
-O título, o corpo e as notas de versão de uma PR são escritos por terceiros e podem trazer instruções disfarçadas. Por isso o agente roda com 15 ferramentas permitidas e nada mais: ler PRs e execuções do GitHub Actions, mesclar, comentar `@dependabot rebase`, consultar o registry do npm e o manifesto de imagens Docker. Ele não tem `curl`, `npm install`, `git push`, edição de arquivo em repositório nem leitura do resto do disco. Tempo e turnos também têm teto: 90 minutos e 300 turnos.
+O título, o corpo e as notas de versão de uma PR são escritos por terceiros e podem trazer instruções disfarçadas. Por isso o agente roda com 16 permissões e nada mais: ler PRs e execuções do GitHub Actions, mesclar, comentar `@dependabot rebase`, consultar o registry do npm e o manifesto de imagens Docker, e ler e gravar só na pasta do próprio relatório. Ele não tem `curl`, `npm install`, `git push`, edição de arquivo em repositório nem servidor MCP. Tempo e turnos também têm teto: 90 minutos e 300 turnos.
+
+Só a lista `--allowedTools` não basta: ela aprova de antemão o que está nela, mas o resto ainda segue o modo de permissão e as regras do `settings.json` de quem roda. O script por isso usa `--permission-mode dontAsk` (nega o que não está na lista), `--setting-sources project` (ignora as regras do usuário), `--tools` e `--strict-mcp-config`. Para conferir, peça ao agente um comando fora da lista, como `uname`: ele é negado.
 
 ## Regras que vieram de erro
 
@@ -34,4 +36,4 @@ systemctl --user daemon-reload
 systemctl --user enable --now triagem-dependabot.timer
 ```
 
-Precisa do `gh` autenticado com permissão de merge nas organizações, do Claude Code e do `npm`. O estado e os logs ficam em `~/.local/state/dependencias` (ou em `$TRIAGEM_ESTADO`).
+Precisa do `gh` autenticado com permissão de merge nas organizações, do Claude Code e do `npm`. O relatório e os logs ficam em `~/.local/state/dependencias`.
