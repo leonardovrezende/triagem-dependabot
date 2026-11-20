@@ -15,6 +15,10 @@ Toda terça às 9h30, o `systemd` roda o [Claude Code](https://docs.anthropic.co
 
 Depois do merge, quando o repositório implanta sozinho, o agente acompanha o deploy até o fim. O que ficou aberto vai para `pendencias.md` com o motivo exato: major, CI vermelho ou publicador novo.
 
+## Alertas que não viram PR
+
+Muito alerta do Dependabot nunca vira PR, porque a versão está presa por faixa no `package.json` ou a correção só existe numa major, e fica parado na aba Security. Depois da triagem, o [`alertas.sh`](alertas.sh) lista os alertas critical e high de dependências de produção em todos os repositórios e põe no relatório só os que surgiram desde a semana anterior. Ele roda sem o agente e lê da API só repositório, pacote, gravidade e GHSA; o texto do aviso, escrito por terceiros, fica de fora.
+
 ## Por que uma lista fechada de ferramentas
 
 O título, o corpo e as notas de versão de uma PR são escritos por terceiros e podem trazer instruções disfarçadas. Por isso o agente roda com 16 permissões e nada mais: ler PRs e execuções do GitHub Actions, mesclar, comentar `@dependabot rebase`, consultar o registry do npm e o manifesto de imagens Docker, e ler e gravar só na pasta do próprio relatório. Ele não tem `curl`, `npm install`, `git push`, edição de arquivo em repositório nem servidor MCP. Tempo e turnos também têm teto: 90 minutos e 300 turnos.

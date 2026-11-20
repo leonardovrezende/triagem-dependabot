@@ -46,6 +46,9 @@ if [ $rc -ne 0 ]; then
   { echo "## Erros"; echo "A triagem saiu com código $rc em $(date '+%d/%m/%Y %H:%M'). Log: \`$LOG\`."; } >>"$ESTADO/pendencias.md"
 fi
 
+# Alertas graves que não viraram PR: só o que é novo desde a semana passada.
+"$AQUI/alertas.sh" pet-eng-comp-org introcomp-org >>"$LOG" 2>&1
+
 # Guarda só os 8 logs mais recentes.
 ls -1t "$ESTADO"/execucao-*.log 2>/dev/null | tail -n +9 | xargs -r rm -f
 exit 0
